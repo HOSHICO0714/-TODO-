@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HELLO 個展準備ダッシュボード</title>
+  <style>
+    :root{
+      --bg:#fffaf4;
+      --card:#ffffff;
+      --ink:#2f2926;
+      --muted:#756b65;
+      --line:#eadfd6;
+      --accent:#e96858;
+      --accent-soft:#ffe4dd;
+      --green:#6fa880;
+      --yellow:#e7ad43;
+      --red:#d55353;
+      --shadow:0 10px 28px rgba(68,44,31,.08);
+      --radius:20px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      background:
+        radial-gradient(circle at top left,#fff0e8 0,transparent 35%),
+        linear-gradient(180deg,#fffaf4,#fdf7f1);
+      color:var(--ink);
+      font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic","Noto Sans JP",sans-serif;
+      min-height:100vh;
+    }
+    button,input,select,textarea{font:inherit}
+    .wrap{max-width:1180px;margin:auto;padding:20px}
+    header{
+      display:flex;gap:16px;justify-content:space-between;align-items:flex-start;
+      margin:10px 0 18px;
+    }
+    h1{margin:0;font-size:clamp(26px,5vw,42px);letter-spacing:.02em}
+    .subtitle{margin-top:6px;color:var(--muted)}
+    .pill{
+      background:var(--card);border:1px solid var(--line);border-radius:999px;
+      padding:10px 14px;box-shadow:var(--shadow);white-space:nowrap;font-weight:700
+    }
+    .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+    .stat{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow)}
+    .stat small{color:var(--muted)}
+    .stat strong{display:block;font-size:28px;margin-top:5px}
+    .progress-track{height:10px;background:#f0e6df;border-radius:999px;overflow:hidden;margin-top:10px}
+    .progress-bar{height:100%;background:linear-gradient(90deg,var(--accent),#f29e71);width:0;transition:.3s}
+    .toolbar,.panel{
+      background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+      padding:16px;box-shadow:var(--shadow)
+    }
+    .toolbar{display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:10px;margin-bottom:16px}
+    input,select,textarea{
+      width:100%;border:1px solid var(--line);border-radius:12px;padding:11px 12px;
+      background:#fff;color:var(--ink);outline:none
+    }
+    input:focus,select:focus,textarea:focus{border-color:#ef9c8f;box-shadow:0 0 0 3px #ffe9e5}
+    button{
+      border:0;border-radius:12px;padding:10px 14px;cursor:pointer;font-weight:700;
+      transition:.15s transform,.15s opacity
+    }
+    button:hover{transform:translateY(-1px)}
+    .primary{background:var(--accent);color:#fff}
+    .secondary{background:#f7eee8;color:var(--ink)}
+    .danger{background:#fff0f0;color:var(--red)}
+    .main{display:grid;grid-template-columns:1.5fr .8fr;gap:16px}
+    .section-title{display:flex;align-items:center;justify-content:space-between;margin:0 0 12px}
+    .section-title h2{font-size:20px;margin:0}
+    .task-list{display:flex;flex-direction:column;gap:10px}
+    .task{
+      border:1px solid var(--line);border-radius:16px;padding:13px;
+      display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:start;background:#fff
+    }
+    .task.done{opacity:.58;background:#faf7f4}
+    .task.done .task-title{text-decoration:line-through}
+    .check{
+      width:24px;height:24px;border-radius:8px;border:2px solid #d8c7bb;background:#fff;
+      display:grid;place-items:center;padding:0;margin-top:1px
+    }
+    .task.done .check{background:var(--green);border-color:var(--green);color:#fff}
+    .task-title{font-weight:800;margin-bottom:5px}
+    .meta{display:flex;gap:7px;flex-wrap:wrap;color:var(--muted);font-size:12px}
+    .tag{padding:4px 8px;border-radius:999px;background:#f7eee8}
+    .priority-high{background:#ffe2e2;color:#a62f2f}
+    .priority-medium{background:#fff0c9;color:#8a5b00}
+    .priority-low{background:#e7f4eb;color:#376d47}
+    .late{color:var(--red);font-weight:800}
+    .soon{color:#9a6700;font-weight:800}
+    .actions{display:flex;gap:6px}
+    .icon-btn{padding:7px 9px;background:#f8f1ec}
+    .focus-list{display:flex;flex-direction:column;gap:10px}
+    .focus-card{
+      padding:13px;border-radius:14px;background:linear-gradient(135deg,#fff0ea,#fff8ef);
+      border:1px solid #f4d7ca
+    }
+    .focus-card strong{display:block;margin-bottom:4px}
+    .empty{padding:26px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:14px}
+    .aside-stack{display:flex;flex-direction:column;gap:16px}
+    .mini-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .legend{font-size:13px;color:var(--muted);line-height:1.8}
+    dialog{
+      width:min(560px,calc(100% - 28px));border:0;border-radius:22px;padding:0;box-shadow:0 24px 70px rgba(0,0,0,.25)
+    }
+    dialog::backdrop{background:rgba(47,41,38,.35);backdrop-filter:blur(3px)}
+    .modal{padding:20px}
+    .modal h3{margin-top:0}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .full{grid-column:1/-1}
+    .modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+    footer{text-align:center;color:var(--muted);font-size:12px;padding:24px}
+    @media(max-width:860px){
+      .grid{grid-template-columns:1fr 1fr}
+      .toolbar{grid-template-columns:1fr 1fr}
+      .toolbar input{grid-column:1/-1}
+      .main{grid-template-columns:1fr}
+    }
+    @media(max-width:540px){
+      .wrap{padding:12px}
+      header{flex-direction:column}
+      .grid{grid-template-columns:1fr 1fr}
+      .stat{padding:14px}
+      .stat strong{font-size:23px}
+      .toolbar{grid-template-columns:1fr}
+      .toolbar input{grid-column:auto}
+      .task{grid-template-columns:auto 1fr}
+      .actions{grid-column:2}
+      .form-grid{grid-template-columns:1fr}
+      .full{grid-column:auto}
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>🍎 HELLO 個展準備</h1>
+      <div class="subtitle">gallery and shop 山小屋｜2026年10月30日〜11月1日</div>
+    </div>
+    <div class="pill" id="countdown">あと - 日</div>
+  </header>
+
+  <section class="grid">
+    <div class="stat"><small>全体進捗</small><strong id="progressText">0%</strong><div class="progress-track"><div class="progress-bar" id="progressBar"></div></div></div>
+    <div class="stat"><small>未完了</small><strong id="openCount">0</strong></div>
+    <div class="stat"><small>完了</small><strong id="doneCount">0</strong></div>
+    <div class="stat"><small>締切7日以内</small><strong id="soonCount">0</strong></div>
+  </section>
+
+  <section class="toolbar">
+    <input id="search" placeholder="タスクを検索" />
+    <select id="filterCategory">
+      <option value="">すべてのカテゴリ</option>
+    </select>
+    <select id="filterStatus">
+      <option value="open">未完了のみ</option>
+      <option value="all">すべて</option>
+      <option value="done">完了のみ</option>
+    </select>
+    <button class="primary" id="addBtn">＋ タスク追加</button>
+  </section>
+
+  <div class="main">
+    <section class="panel">
+      <div class="section-title">
+        <h2>タスク一覧</h2>
+        <button class="secondary" id="sortBtn">優先順</button>
+      </div>
+      <div class="task-list" id="taskList"></div>
+    </section>
+
+    <aside class="aside-stack">
+      <section class="panel">
+        <div class="section-title"><h2>⭐ 今日やること</h2></div>
+        <div class="focus-list" id="focusList"></div>
+      </section>
+
+      <section class="panel">
+        <div class="section-title"><h2>データ管理</h2></div>
+        <div class="mini-actions">
+          <button class="secondary" id="exportBtn">書き出し</button>
+          <button class="secondary" id="importBtn">読み込み</button>
+          <input type="file" id="importFile" accept=".json" hidden />
+          <button class="secondary" id="resetBtn">初期データ</button>
+          <button class="danger" id="clearDoneBtn">完了を削除</button>
+        </div>
+        <p class="legend">データはこのブラウザ内に自動保存されます。端末変更時は「書き出し」でバックアップしてください。人類はバックアップを忘れた頃に端末を落とします。</p>
+      </section>
+    </aside>
+  </div>
+  <footer>HELLO Exhibition Dashboard｜保存先：このブラウザのlocalStorage</footer>
+</div>
+
+<dialog id="taskDialog">
+  <form method="dialog" class="modal" id="taskForm">
+    <h3 id="modalTitle">タスク追加</h3>
+    <div class="form-grid">
+      <label class="full">タスク名
+        <input id="titleInput" required maxlength="80" />
+      </label>
+      <label>カテゴリ
+        <select id="categoryInput">
+          <option>最優先</option><option>原画</option><option>グッズ</option>
+          <option>PR・集客</option><option>展示準備</option><option>売上</option><option>その他</option>
+        </select>
+      </label>
+      <label>優先度
+        <select id="priorityInput">
+          <option value="high">高</option>
+          <option value="medium">中</option>
+          <option value="low">低</option>
+        </select>
+      </label>
+      <label>締切
+        <input type="date" id="dueInput" />
+      </label>
+      <label>状態
+        <select id="doneInput"><option value="false">未完了</option><option value="true">完了</option></select>
+      </label>
+      <label class="full">メモ
+        <textarea id="noteInput" rows="3" maxlength="300"></textarea>
+      </label>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="secondary" id="cancelBtn">キャンセル</button>
+      <button class="primary" value="default">保存</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+const STORAGE_KEY = "hello_exhibition_tasks_v1";
+const EXHIBITION_DATE = new Date("2026-10-30T00:00:00+09:00");
+
+const seedTasks = [
+  {id:crypto.randomUUID(),title:"オーダーイラストの手直し",category:"最優先",priority:"high",due:"2026-07-28",done:false,note:"修正内容と納期を確認"},
+  {id:crypto.randomUUID(),title:"商品画像をヴィレッジヴァンガードへ提出",category:"最優先",priority:"high",due:"2026-07-29",done:false,note:"提出画像・商品名・限定商品の有無を最終確認"},
+  {id:crypto.randomUUID(),title:"個展のお品書きを作成",category:"最優先",priority:"high",due:"2026-08-10",done:false,note:"商品名・価格・数量・画像を整理"},
+  {id:crypto.randomUUID(),title:"メイン原画を1枚完成させる",category:"原画",priority:"high",due:"2026-08-09",done:false,note:"ラフ追加より完成優先"},
+  {id:crypto.randomUUID(),title:"展示作品リストを作る",category:"原画",priority:"medium",due:"2026-08-16",done:false,note:"サイズ・額装・販売可否も記録"},
+  {id:crypto.randomUUID(),title:"グッズ仕様と発注先を確定",category:"グッズ",priority:"high",due:"2026-08-31",done:false,note:"シール、ポストカード、ハメパチ等"},
+  {id:crypto.randomUUID(),title:"値札とPOPの共通デザインを作る",category:"展示準備",priority:"medium",due:"2026-09-20",done:false,note:"会場で見やすい文字サイズ"},
+  {id:crypto.randomUUID(),title:"展示レイアウトのラフを作る",category:"展示準備",priority:"medium",due:"2026-09-06",done:false,note:"壁面・導線・写真スポット"},
+  {id:crypto.randomUUID(),title:"個展告知投稿の基本テンプレートを作る",category:"PR・集客",priority:"medium",due:"2026-08-23",done:false,note:"Instagram、Threads、TikTok用"},
+  {id:crypto.randomUUID(),title:"売上目標と商品別数量を仮決定",category:"売上",priority:"medium",due:"2026-08-31",done:false,note:"会場費53,000円回収を最低ラインにする"}
+];
+
+let tasks = loadTasks();
+let editingId = null;
+let sortMode = "priority";
+
+const el = id => document.getElementById(id);
+const priorityRank = {high:0,medium:1,low:2};
+const priorityLabel = {high:"高",medium:"中",low:"低"};
+
+function loadTasks(){
+  try{
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+    return Array.isArray(saved) ? saved : structuredClone(seedTasks);
+  }catch(e){ return structuredClone(seedTasks); }
+}
+function saveTasks(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+  render();
+}
+function daysUntil(dateStr){
+  if(!dateStr) return null;
+  const today = new Date(); today.setHours(0,0,0,0);
+  const d = new Date(dateStr+"T00:00:00");
+  return Math.ceil((d-today)/86400000);
+}
+function escapeHtml(str=""){
+  return str.replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
+}
+function updateCategoryFilter(){
+  const select = el("filterCategory");
+  const current = select.value;
+  const cats = [...new Set(tasks.map(t=>t.category))].sort();
+  select.innerHTML = '<option value="">すべてのカテゴリ</option>'+cats.map(c=>`<option>${escapeHtml(c)}</option>`).join("");
+  select.value = cats.includes(current) ? current : "";
+}
+function filteredTasks(){
+  const q = el("search").value.trim().toLowerCase();
+  const category = el("filterCategory").value;
+  const status = el("filterStatus").value;
+  let list = tasks.filter(t=>{
+    const text = `${t.title} ${t.note||""} ${t.category}`.toLowerCase();
+    return (!q || text.includes(q)) &&
+      (!category || t.category===category) &&
+      (status==="all" || (status==="done" ? t.done : !t.done));
+  });
+  list.sort((a,b)=>{
+    if(sortMode==="due"){
+      return (a.due||"9999-12-31").localeCompare(b.due||"9999-12-31");
+    }
+    return Number(a.done)-Number(b.done) || priorityRank[a.priority]-priorityRank[b.priority] ||
+      (a.due||"9999-12-31").localeCompare(b.due||"9999-12-31");
+  });
+  return list;
+}
+function render(){
+  updateCategoryFilter();
+  const list = filteredTasks();
+  el("taskList").innerHTML = list.length ? list.map(taskHtml).join("") : '<div class="empty">該当するタスクはありません</div>';
+
+  document.querySelectorAll("[data-toggle]").forEach(btn=>btn.onclick=()=>toggleTask(btn.dataset.toggle));
+  document.querySelectorAll("[data-edit]").forEach(btn=>btn.onclick=()=>openEdit(btn.dataset.edit));
+  document.querySelectorAll("[data-delete]").forEach(btn=>btn.onclick=()=>deleteTask(btn.dataset.delete));
+
+  const done = tasks.filter(t=>t.done).length;
+  const open = tasks.length-done;
+  const pct = tasks.length ? Math.round(done/tasks.length*100) : 0;
+  const soon = tasks.filter(t=>!t.done && t.due && daysUntil(t.due)>=0 && daysUntil(t.due)<=7).length;
+  el("progressText").textContent=pct+"%";
+  el("progressBar").style.width=pct+"%";
+  el("openCount").textContent=open;
+  el("doneCount").textContent=done;
+  el("soonCount").textContent=soon;
+
+  const focus = tasks.filter(t=>!t.done).sort((a,b)=>
+    priorityRank[a.priority]-priorityRank[b.priority] ||
+    (a.due||"9999-12-31").localeCompare(b.due||"9999-12-31")
+  ).slice(0,3);
+  el("focusList").innerHTML = focus.length ? focus.map(t=>`
+    <div class="focus-card"><strong>${escapeHtml(t.title)}</strong>
+    <span>${escapeHtml(t.category)}${t.due ? "｜締切 "+t.due : ""}</span></div>`).join("") :
+    '<div class="empty">全部完了。奇跡は起きます。</div>';
+
+  const now = new Date();
+  const days = Math.ceil((EXHIBITION_DATE-now)/86400000);
+  el("countdown").textContent = days>=0 ? `個展まであと ${days}日` : "個展開催中・終了済み";
+}
+function taskHtml(t){
+  const d = daysUntil(t.due);
+  let dueClass="", dueText="";
+  if(t.due){
+    if(!t.done && d<0){dueClass="late";dueText=`期限超過 ${Math.abs(d)}日`;}
+    else if(!t.done && d<=7){dueClass="soon";dueText=`あと${d}日`;}
+    else dueText=t.due;
+  }
+  return `<div class="task ${t.done?"done":""}">
+    <button class="check" data-toggle="${t.id}" aria-label="完了切替">${t.done?"✓":""}</button>
+    <div>
+      <div class="task-title">${escapeHtml(t.title)}</div>
+      <div class="meta">
+        <span class="tag">${escapeHtml(t.category)}</span>
+        <span class="tag priority-${t.priority}">優先度 ${priorityLabel[t.priority]}</span>
+        ${t.due?`<span class="${dueClass}">${dueText}</span>`:""}
+      </div>
+      ${t.note?`<div class="meta" style="margin-top:7px">${escapeHtml(t.note)}</div>`:""}
+    </div>
+    <div class="actions">
+      <button class="icon-btn" data-edit="${t.id}">編集</button>
+      <button class="icon-btn danger" data-delete="${t.id}">削除</button>
+    </div>
+  </div>`;
+}
+function toggleTask(id){
+  const t=tasks.find(t=>t.id===id); if(t){t.done=!t.done;saveTasks();}
+}
+function deleteTask(id){
+  if(confirm("このタスクを削除しますか？")){tasks=tasks.filter(t=>t.id!==id);saveTasks();}
+}
+function openAdd(){
+  editingId=null; el("modalTitle").textContent="タスク追加"; el("taskForm").reset();
+  el("priorityInput").value="high"; el("doneInput").value="false"; el("taskDialog").showModal();
+}
+function openEdit(id){
+  const t=tasks.find(t=>t.id===id); if(!t)return;
+  editingId=id; el("modalTitle").textContent="タスク編集";
+  el("titleInput").value=t.title; el("categoryInput").value=t.category;
+  el("priorityInput").value=t.priority; el("dueInput").value=t.due||"";
+  el("doneInput").value=String(t.done); el("noteInput").value=t.note||"";
+  el("taskDialog").showModal();
+}
+el("taskForm").addEventListener("submit",e=>{
+  e.preventDefault();
+  const data={
+    title:el("titleInput").value.trim(),category:el("categoryInput").value,
+    priority:el("priorityInput").value,due:el("dueInput").value,
+    done:el("doneInput").value==="true",note:el("noteInput").value.trim()
+  };
+  if(!data.title)return;
+  if(editingId){Object.assign(tasks.find(t=>t.id===editingId),data);}
+  else tasks.push({id:crypto.randomUUID(),...data});
+  el("taskDialog").close(); saveTasks();
+});
+el("addBtn").onclick=openAdd;
+el("cancelBtn").onclick=()=>el("taskDialog").close();
+["search","filterCategory","filterStatus"].forEach(id=>el(id).addEventListener("input",render));
+el("sortBtn").onclick=()=>{sortMode=sortMode==="priority"?"due":"priority";el("sortBtn").textContent=sortMode==="priority"?"優先順":"締切順";render();};
+el("clearDoneBtn").onclick=()=>{if(confirm("完了済みタスクをすべて削除しますか？")){tasks=tasks.filter(t=>!t.done);saveTasks();}};
+el("resetBtn").onclick=()=>{if(confirm("初期データに戻しますか？現在の内容は消えます。")){tasks=structuredClone(seedTasks);saveTasks();}};
+el("exportBtn").onclick=()=>{
+  const blob=new Blob([JSON.stringify(tasks,null,2)],{type:"application/json"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob);
+  a.download="HELLO個展タスク_backup.json"; a.click(); URL.revokeObjectURL(a.href);
+};
+el("importBtn").onclick=()=>el("importFile").click();
+el("importFile").addEventListener("change",async e=>{
+  const file=e.target.files[0]; if(!file)return;
+  try{
+    const data=JSON.parse(await file.text());
+    if(!Array.isArray(data))throw new Error();
+    tasks=data; saveTasks(); alert("読み込みました");
+  }catch{alert("正しいバックアップファイルではありません");}
+  e.target.value="";
+});
+render();
+</script>
+</body>
+</html>
